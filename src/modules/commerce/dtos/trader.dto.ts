@@ -12,8 +12,10 @@ export class CreateTraderDto {
   lastNamePaternal: string;
 
   @IsString()
-  @IsNotEmpty()
   lastNameMaternal: string;
+
+  @IsString()
+  apellidoCasada: string;
 
   @IsString()
   @IsNotEmpty()
@@ -24,7 +26,6 @@ export class CreateTraderDto {
   address: string;
 
   @IsString()
-  @IsNotEmpty()
   phone: string;
 
   @IsString()

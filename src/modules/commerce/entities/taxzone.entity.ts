@@ -9,6 +9,6 @@ export class TaxZone {
   @Column()
   name: string;
 
-  @OneToMany(() => Stall, (stall) => stall.taxZonce)
+  @OneToMany(() => Stall, (stall) => stall.taxZone)
   stalls: Stall[];
 }

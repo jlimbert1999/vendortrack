@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsNumber, IsString, IsUUID, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID } from 'class-validator';
 
 export class CreateStallDto {
   @IsNumber()
@@ -7,8 +7,8 @@ export class CreateStallDto {
   number: number;
 
   @Type(() => Number)
-  @IsInt({ message: 'El código correlativo debe ser un número entero' })
-  @Min(1, { message: 'El número no puede ser cero' })
+  @IsNumber()
+  @IsPositive({ message: 'El area no puede ser negativa' })
   area: number;
 
   @IsString()

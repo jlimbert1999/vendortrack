@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 
 import { CategoryService, MarketService, StallService, TaxZoneService, TraderService } from '../services';
 import { PaginationParamsDto } from 'src/modules/common';
@@ -24,9 +24,9 @@ export class StallController {
     return this.stallService.findAll(queryParams);
   }
 
-  @Get('search/traders')
-  searcTraders() {
-    return this.traderSrevice.search();
+  @Get('search/traders/:term')
+  searcTraders(@Param('term') term: string) {
+    return this.traderSrevice.search(term);
   }
 
   @Get('search/categories')

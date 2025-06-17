@@ -17,4 +17,9 @@ export class CertificateController {
   getStallCertificates(@Param('stall') id: string, @Query() queryParams: PaginationParamsDto) {
     return this.certificateService.getStallCertificates(id, queryParams);
   }
+
+  @Get('verify/:id')
+  verify(@Param('id') id: string) {
+    return this.certificateService.verify(id);
+  }
 }

@@ -5,21 +5,39 @@ import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Certificate, Stall } from '../entities';
 import { CreateCertificateDto } from '../dtos';
 import { PaginationParamsDto } from 'src/modules/common';
+import { FilesService } from 'src/modules/files/files.service';
+import { FileGroup } from 'src/modules/files/file-group.enum';
 
 @Injectable()
 export class CertificateService {
   constructor(
     @InjectRepository(Certificate) private certificateRepository: Repository<Certificate>,
     @InjectRepository(Stall) private stallRepository: Repository<Stall>,
+    private fileService: FilesService,
   ) {}
 
+  async verify(id: string) {
+    const certificate = await this.certificateRepository.findOne({
+      where: { id },
+      relations: { trader: true, stall: true },
+    });
+    if (!certificate) {
+      throw new BadRequestException(`El certicado no existe`);
+    }
+    const now = new Date();
+    const isValid = now >= certificate.startDate && now <= certificate.endDate;
+    console.log(isValid);
+    return { certificate, isValid };
+  }
+
   async getStallCertificates(stallId: string, { limit, offset }: PaginationParamsDto) {
-    return await this.certificateRepository.find({
+    const certificates = await this.certificateRepository.find({
       where: { stall: { id: stallId } },
-      relations: { stall: { category: true, market: true, taxZonce: true }, trader: true },
+      relations: { stall: true, trader: true },
       skip: offset,
       take: limit,
     });
+    return certificates.map((item) => this.plainCertificate(item));
   }
 
   async create(data: CreateCertificateDto) {
@@ -51,7 +69,8 @@ export class CertificateService {
       startDate: now,
       endDate: oneYearLater,
     });
-    return await this.certificateRepository.save(certificate);
+    const result = await this.certificateRepository.save(certificate);
+    return this.plainCertificate(result);
   }
 
   private async ensureUniqueCode(code: number) {
@@ -71,5 +90,16 @@ export class CertificateService {
     if (existing) {
       throw new BadRequestException('Ya existe un certificado emitido para este puesto');
     }
+  }
+
+  private plainCertificate(certificate: Certificate) {
+    const { trader, ...props } = certificate;
+    return {
+      ...props,
+      trader: {
+        ...trader,
+        ...(trader.photo && { photo: this.fileService.buildFileUrl(trader.photo, FileGroup.TRADER) }),
+      },
+    };
   }
 }

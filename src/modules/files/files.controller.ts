@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseFilePipeBuilder,
-  Post,
-  Res,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseFilePipeBuilder, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
@@ -31,7 +22,6 @@ export class FilesController {
     )
     file: Express.Multer.File,
   ) {
-    console.log(file);
     return this.filesService.saveFile(file, FileGroup.TRADER);
   }
 

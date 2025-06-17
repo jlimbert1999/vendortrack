@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { mkdir, unlink, writeFile } from 'fs/promises';
@@ -21,14 +17,7 @@ export interface savedFile {
 
 @Injectable()
 export class FilesService {
-  private readonly BASE_UPLOAD_PATH = join(
-    __dirname,
-    '..',
-    '..',
-    '..',
-    'static',
-    'uploads',
-  );
+  private readonly BASE_UPLOAD_PATH = join(__dirname, '..', '..', '..', 'static', 'uploads');
 
   private readonly FOLDERS: Record<string, string[]> = {
     images: ['jpg', 'png', 'jpeg'],
@@ -42,10 +31,7 @@ export class FilesService {
     return `${host}/files/${group}/${filename}`;
   }
 
-  async saveFile(
-    file: Express.Multer.File,
-    group: FileGroup,
-  ): Promise<savedFile> {
+  async saveFile(file: Express.Multer.File, group: FileGroup): Promise<savedFile> {
     const fileExtension = file.originalname.split('.').pop()!.toLowerCase();
 
     const subfolder = this.getFolderByExtension(fileExtension);
@@ -61,10 +47,7 @@ export class FilesService {
     try {
       await writeFile(filePath, file.buffer);
 
-      const decodedOriginalName = Buffer.from(
-        file.originalname,
-        'latin1',
-      ).toString('utf8');
+      const decodedOriginalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
 
       return {
         fileName: savedFileName,
@@ -88,9 +71,7 @@ export class FilesService {
   }
 
   async removeMany(fileNames: string[], group: FileGroup) {
-    await Promise.all(
-      fileNames.map((fileName) => this.remove(fileName, group)),
-    );
+    await Promise.all(fileNames.map((fileName) => this.remove(fileName, group)));
   }
 
   getStaticFilePath({ fileName, group }: GetFileDto): string {

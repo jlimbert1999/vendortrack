@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Stall } from './stall.entity';
 import { Certificate } from './certificate.entity';
 
@@ -15,6 +15,9 @@ export class Trader {
 
   @Column()
   lastNameMaternal: string;
+
+  @Column({ nullable: true })
+  apellidoCasada: string;
 
   @Column({ unique: true })
   dni: string;
@@ -36,4 +39,7 @@ export class Trader {
 
   @OneToMany(() => Certificate, (cert) => cert.trader)
   certificates: Certificate[];
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
 }
