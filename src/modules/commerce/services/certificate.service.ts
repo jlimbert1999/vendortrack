@@ -2,11 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
+import { FilesService } from 'src/modules/files/files.service';
+import { FileGroup } from 'src/modules/files/file-group.enum';
 import { Certificate, Stall } from '../entities';
 import { CreateCertificateDto } from '../dtos';
 import { PaginationParamsDto } from 'src/modules/common';
-import { FilesService } from 'src/modules/files/files.service';
-import { FileGroup } from 'src/modules/files/file-group.enum';
 
 @Injectable()
 export class CertificateService {
@@ -22,11 +22,10 @@ export class CertificateService {
       relations: { trader: true, stall: true },
     });
     if (!certificate) {
-      throw new BadRequestException(`El certicado no existe`);
+      throw new NotFoundException(`El certificado no existe`);
     }
     const now = new Date();
     const isValid = now >= certificate.startDate && now <= certificate.endDate;
-    console.log(isValid);
     return { certificate, isValid };
   }
 

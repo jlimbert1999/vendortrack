@@ -4,12 +4,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { CommerceModule } from './modules/commerce/commerce.module';
 import { FilesModule } from './modules/files/files.module';
+import { UserModule } from './modules/users/user.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { EnvVars, validate } from './config';
 
 @Module({
   imports: [
     CommerceModule,
     FilesModule,
+    UserModule,
+    AuthModule,
     ConfigModule.forRoot({ validate }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
