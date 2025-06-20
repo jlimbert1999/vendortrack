@@ -8,11 +8,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, MoreThanOrEqual, QueryFailedError, Repository } from 'typeorm';
 
-import { CreateTraderDto, UpdateTraderDto } from '../dtos';
-import { Certificate, Trader } from '../entities';
 import { FilesService } from 'src/modules/files/files.service';
 import { FileGroup } from 'src/modules/files/file-group.enum';
 import { PaginationParamsDto } from 'src/modules/common';
+import { CreateTraderDto, UpdateTraderDto } from '../dtos';
+import { Certificate, Trader } from '../entities';
 
 @Injectable()
 export class TraderService {
@@ -68,12 +68,18 @@ export class TraderService {
     return this.plainTrader(updated);
   }
 
-  async findAll({ limit, offset }: PaginationParamsDto) {
-    const [traders, length] = await this.traderRepository.findAndCount({
-      take: limit,
-      skip: offset,
-      order: { createdAt: 'DESC' },
-    });
+  async findAll({ limit, offset, term }: PaginationParamsDto) {
+    const query = this.traderRepository.createQueryBuilder('trader').take(limit).skip(offset);
+    if (term) {
+      query
+        .where(`CONCAT(trader.firstName, ' ', trader.lastNamePaternal, ' ', trader.lastNameMaternal) ILIKE :search`, {
+          search: `%${term}%`,
+        })
+        .orWhere('trader.dni ILIKE :dni', { dni: `%${term}%` });
+    }
+
+    const [traders, length] = await query.getManyAndCount();
+
     return {
       traders: traders.map((trader) => this.plainTrader(trader)),
       length,

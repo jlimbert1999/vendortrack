@@ -6,6 +6,7 @@ import { CustomUploadFileTypeValidator } from './validators/upload-file-type.val
 import { GetFileDto } from './dtos/get-file.dto';
 import { FilesService } from './files.service';
 import { FileGroup } from './file-group.enum';
+import { Public } from '../auth/decorators';
 
 @Controller('files')
 export class FilesController {
@@ -25,6 +26,7 @@ export class FilesController {
     return this.filesService.saveFile(file, FileGroup.TRADER);
   }
 
+  @Public()
   @Get(':group/:fileName')
   getFile(@Res() res: Response, @Param() requestParams: GetFileDto) {
     const path = this.filesService.getStaticFilePath(requestParams);

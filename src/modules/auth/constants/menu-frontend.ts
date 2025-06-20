@@ -4,8 +4,8 @@ export const MENU_FRONTEND = [
   {
     role: UserRole.OFFICER,
     menu: [
-      { label: 'Comerciantes', icon: 'person', routerLink: 'traders' },
-      { label: 'Puestos', icon: 'pets', routerLink: 'stalls' },
+      { label: 'Comerciantes', icon: 'diversity_3', routerLink: 'traders' },
+      { label: 'Puestos', icon: 'storefront', routerLink: 'stalls' },
     ],
   },
   {

@@ -44,13 +44,32 @@ export class StallService {
     return this.plainStall(createdStall);
   }
 
-  async findAll({ limit, offset }: PaginationParamsDto) {
-    const [stalls, length] = await this.stallRepository.findAndCount({
-      take: limit,
-      skip: offset,
-      relations: { trader: true },
-      order: { createdAt: 'DESC' },
-    });
+  async findAll({ limit, offset, term }: PaginationParamsDto) {
+    const query = this.stallRepository
+      .createQueryBuilder('stall')
+      .leftJoinAndSelect('stall.trader', 'trader')
+      .leftJoinAndSelect('stall.market', 'market')
+      .leftJoinAndSelect('stall.category', 'category')
+      .leftJoinAndSelect('stall.taxZone', 'taxZone')
+      .take(limit)
+      .skip(offset)
+      .orderBy('stall.createdAt', 'DESC');
+
+    if (term) {
+      const isNumeric = !isNaN(+term);
+      if (isNumeric) {
+        query.andWhere('stall.number = :number', { number: +term });
+      } else {
+        const lowerTerm = `%${term.toLowerCase()}%`;
+        query.where(
+          `CONCAT(trader.firstName, ' ', trader.lastNamePaternal, ' ', trader.lastNameMaternal) ILIKE :search`,
+          {
+            search: `%${lowerTerm}%`,
+          },
+        );
+      }
+    }
+    const [stalls, length] = await query.getManyAndCount();
     return {
       stalls: stalls.map((item) => this.plainStall(item)),
       length,
