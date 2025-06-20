@@ -4,8 +4,8 @@ import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { CreateUserDto, UpdateUserDto } from './dtos';
-import { Users } from './entities/user.entity';
 import { PaginationParamsDto } from '../common';
+import { Users } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -53,8 +53,8 @@ export class UserService {
     if (duplicate) throw new BadRequestException(`El login ${login} ya existe`);
   }
 
-  private removePasswordField(user: Users) {
-    const { password, ...props } = user;
-    return props;
+  private removePasswordField(user: Users): Omit<Users, 'password'> {
+    const { password: _password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }

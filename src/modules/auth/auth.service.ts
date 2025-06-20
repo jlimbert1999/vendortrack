@@ -31,7 +31,7 @@ export class AuthService {
   async checkAuthStatus(userId: string) {
     const userDB = await this.userRepository.findOneBy({ id: userId });
     if (!userDB) throw new UnauthorizedException();
-    return { token: this.generateToken(userDB), menu: this._generateMenu(userDB.roles), roles: userDB.roles };
+    return { token: this.generateToken(userDB), menu: this.generateMenu(userDB.roles), roles: userDB.roles };
   }
 
   private generateToken(user: Users): string {
@@ -42,7 +42,7 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  private _generateMenu(roles: string[]): menuFrontend[] {
+  private generateMenu(roles: string[]): menuFrontend[] {
     const menu = MENU_FRONTEND;
     return menu
       .filter(({ role }) => roles.includes(role))
