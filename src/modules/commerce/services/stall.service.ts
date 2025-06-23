@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
-import { Category, Market, Stall, TaxZone, Trader } from '../entities';
+import { Category, Certificate, Market, Stall, TaxZone, Trader } from '../entities';
 import { FilesService } from 'src/modules/files/files.service';
 import { FileGroup } from 'src/modules/files/file-group.enum';
 import { PaginationParamsDto } from 'src/modules/common';
-import { CreateStallDto } from '../dtos';
+import { CreateStallDto, UpdateStallDto } from '../dtos';
 
 interface entityRalationIds {
   traderId: string;
@@ -22,6 +22,7 @@ export class StallService {
     @InjectRepository(Trader) private traderRepository: Repository<Trader>,
     @InjectRepository(TaxZone) private taxZoneRepository: Repository<TaxZone>,
     @InjectRepository(Category) private categoryRepository: Repository<Category>,
+    @InjectRepository(Certificate) private certificateRepository: Repository<Certificate>,
     private fileService: FilesService,
   ) {}
 
@@ -42,6 +43,30 @@ export class StallService {
     });
     const createdStall = await this.stallRepository.save(entity);
     return this.plainStall(createdStall);
+  }
+
+  async update(id: string, stallDto: UpdateStallDto) {
+    const stall = await this.stallRepository.findOne({ where: { id }, relations: { trader: true } });
+
+    if (!stall) {
+      throw new NotFoundException('Puesto no encontrado');
+    }
+
+    const now = new Date();
+    const hasActiveCertificate = await this.certificateRepository.exists({
+      where: {
+        stall: { id },
+        startDate: LessThanOrEqual(now),
+        endDate: MoreThanOrEqual(now),
+      },
+    });
+
+    if (hasActiveCertificate) {
+      throw new BadRequestException('No se puede editar el puesto porque tiene un certificado vigente');
+    }
+
+    const updated = await this.stallRepository.save({ ...stall, ...stallDto });
+    return this.plainStall(updated);
   }
 
   async findAll({ limit, offset, term }: PaginationParamsDto) {

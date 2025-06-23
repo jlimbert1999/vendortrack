@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 
 import { CategoryService, MarketService, StallService, TaxZoneService, TraderService } from '../services';
 import { PaginationParamsDto } from 'src/modules/common';
-import { CreateStallDto } from '../dtos';
+import { CreateStallDto, UpdateStallDto } from '../dtos';
 
 @Controller('stall')
 export class StallController {
@@ -17,6 +17,11 @@ export class StallController {
   @Post()
   create(@Body() body: CreateStallDto) {
     return this.stallService.create(body);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() body: UpdateStallDto) {
+    return this.stallService.update(id, body);
   }
 
   @Get()

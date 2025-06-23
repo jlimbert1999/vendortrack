@@ -1,3 +1,4 @@
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID } from 'class-validator';
 
@@ -27,3 +28,5 @@ export class CreateStallDto {
   @IsNumber()
   taxZoneId: number;
 }
+
+export class UpdateStallDto extends PartialType(OmitType(CreateStallDto, ['number', 'marketId', "categoryId", "taxZoneId"] as const)) {}
