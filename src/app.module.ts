@@ -7,7 +7,8 @@ import { FilesModule } from './modules/files/files.module';
 import { UserModule } from './modules/users/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EnvVars, validate } from './config';
-
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   imports: [
     CommerceModule,
@@ -28,6 +29,9 @@ import { EnvVars, validate } from './config';
         synchronize: true,
       }),
       inject: [ConfigService],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
     }),
   ],
   controllers: [],
