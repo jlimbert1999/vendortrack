@@ -3,6 +3,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CertificateService } from '../services';
 import { CreateCertificateDto } from '../dtos';
 import { PaginationParamsDto } from 'src/modules/common';
+import { Public } from 'src/modules/auth/decorators';
 
 @Controller('certificate')
 export class CertificateController {
@@ -18,6 +19,7 @@ export class CertificateController {
     return this.certificateService.getStallCertificates(id, queryParams);
   }
 
+  @Public()
   @Get('verify/:id')
   verify(@Param('id') id: string) {
     return this.certificateService.verify(id);
