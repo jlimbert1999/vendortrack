@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, QueryFailedError, Repository } from 'typeorm';
 
 import { Category, Certificate, Market, Stall, TaxZone, Trader } from '../entities';
 import { FilesService } from 'src/modules/files/files.service';
@@ -27,22 +27,29 @@ export class StallService {
   ) {}
 
   async create(stallDto: CreateStallDto) {
-    const { categoryId, marketId, traderId, taxZoneId, ...props } = stallDto;
-    const { category, trader, market, taxZone } = await this.loadRelations({
-      categoryId,
-      marketId,
-      traderId,
-      taxZoneId,
-    });
-    const entity = this.stallRepository.create({
-      category,
-      trader,
-      market,
-      taxZone,
-      ...props,
-    });
-    const createdStall = await this.stallRepository.save(entity);
-    return this.plainStall(createdStall);
+    try {
+      const { categoryId, marketId, traderId, taxZoneId, ...props } = stallDto;
+      const { category, trader, market, taxZone } = await this.loadRelations({
+        categoryId,
+        marketId,
+        traderId,
+        taxZoneId,
+      });
+      const entity = this.stallRepository.create({
+        category,
+        trader,
+        market,
+        taxZone,
+        ...props,
+      });
+      const createdStall = await this.stallRepository.save(entity);
+      return this.plainStall(createdStall);
+    } catch (error: unknown) {
+      if (error instanceof QueryFailedError && error['code'] === '23505') {
+        throw new BadRequestException('Numero de puesto por piso/mercado duplicado');
+      }
+      throw new InternalServerErrorException('No se puedo registrar el puesto');
+    }
   }
 
   async update(id: string, stallDto: UpdateStallDto) {
@@ -99,6 +106,27 @@ export class StallService {
       stalls: stalls.map((item) => this.plainStall(item)),
       length,
     };
+  }
+
+  async generateStallFloor() {
+    const stalls = await this.stallRepository.find({});
+    for (const stall of stalls) {
+      if (!stall.location) {
+        continue;
+      }
+
+      const match = stall.location.match(/\d+/);
+
+      if (!match) {
+        console.warn(`No se pudo extraer piso del stall ${stall.id} (location="${stall.location}")`);
+        continue;
+      }
+      const floor = Number(match[0]);
+      await this.stallRepository.update(stall.id, {
+        floor,
+      });
+    }
+    return { message: 'Update completed' };
   }
 
   private async loadRelations({ categoryId, marketId, traderId, taxZoneId }: entityRalationIds) {

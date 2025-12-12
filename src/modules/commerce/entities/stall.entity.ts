@@ -7,7 +7,7 @@ import { Market } from './market.entity';
 import { TaxZone } from './taxzone.entity';
 
 @Entity()
-@Index(['market', 'number', 'category'], { unique: true })
+@Index(['market', 'number', 'category', 'floor'], { unique: true })
 export class Stall {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -18,7 +18,10 @@ export class Stall {
   @Column({ type: 'numeric', precision: 10, scale: 2 })
   area: number;
 
-  @Column()
+  @Column({ type: 'int', nullable: true })
+  floor: number;
+
+  @Column({ nullable: true })
   location: string;
 
   @ManyToOne(() => Market, (market) => market.stalls, { eager: true })

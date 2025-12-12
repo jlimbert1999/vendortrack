@@ -1,6 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID } from 'class-validator';
+import { IsInt, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Min } from 'class-validator';
 
 export class CreateStallDto {
   @IsNumber()
@@ -13,8 +13,13 @@ export class CreateStallDto {
   area: number;
 
   @IsString()
-  @IsNotEmpty()
-  location: string;
+  @IsOptional()
+  location?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  floor: number;
 
   @IsUUID()
   traderId: string;
@@ -29,4 +34,6 @@ export class CreateStallDto {
   taxZoneId: number;
 }
 
-export class UpdateStallDto extends PartialType(OmitType(CreateStallDto, ['number', 'marketId', "categoryId", "taxZoneId"] as const)) {}
+export class UpdateStallDto extends PartialType(
+  OmitType(CreateStallDto, ['number', 'marketId', 'categoryId', 'taxZoneId'] as const),
+) {}

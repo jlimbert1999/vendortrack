@@ -28,7 +28,7 @@ export class TraderService {
       const createdTrader = await this.traderRepository.save(entity);
       return this.plainTrader(createdTrader);
     } catch (error) {
-      if (error instanceof QueryFailedError && error.driverError['code'] === '23505') {
+      if (error instanceof QueryFailedError && error['code'] === '23505') {
         throw new ConflictException(`El numero ${traderDto.dni} ya esta registrado`);
       }
       throw new InternalServerErrorException();
